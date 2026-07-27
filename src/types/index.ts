@@ -7,20 +7,17 @@ export interface AuthUser {
   role: Role;
   token: string;
 }
+export type StatusUsuario = 'ATIVO' | 'INATIVO';
 
 export interface Doador {
   id: string;
   nome: string;
-  email: string;
-  telefone: string;
-  documento: string;
-  tipo: 'PF' | 'PJ';
+  telefone?: string;
   endereco?: string;
-  ativo: boolean;
-  createdAt: string;
+  status: StatusUsuario;
+  createdAt?: string;
 }
 
-export type StatusUsuario = 'ATIVO' | 'INATIVO';
 export type TipoBeneficiario = 'FAMILIA' | 'ONG' | 'ESCOLA' | 'ABRIGO';
 export type NivelPrioridade = 'CRITICA' | 'URGENTE' | 'MEDIA' | 'BAIXA';
 
