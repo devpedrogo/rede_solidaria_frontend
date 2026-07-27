@@ -31,10 +31,13 @@ export default function DashboardPage() {
       solicitacoesService.list(),
     ])
       .then(([d, b, doa, s]) => {
-        setDoadores(d);
-        setBeneficiarios(b);
-        setDoacoes(doa);
-        setSolicitacoes(s);
+        setDoadores(Array.isArray(d) ? d : []);
+        setBeneficiarios(Array.isArray(b) ? b : []);
+        setDoacoes(Array.isArray(doa) ? doa : []);
+        setSolicitacoes(Array.isArray(s) ? s : []);
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar dados do Dashboard:", err);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -45,8 +48,8 @@ export default function DashboardPage() {
   const entregues = doacoes.filter((d) => d.status === 'ENTREGUE').length;
 
   const metrics: Metric[] = [
-    { label: 'Doadores', value: doadores.filter((d) => d.ativo).length, icon: Users, color: 'text-accent-600', bg: 'bg-accent-50' },
-    { label: 'Beneficiários', value: beneficiarios.filter((b) => b.ativo).length, icon: HeartHandshake, color: 'text-primary-600', bg: 'bg-primary-50' },
+    { label: 'Doadores', value: doadores.filter((d) => d.ativo ?? true).length, icon: Users, color: 'text-accent-600', bg: 'bg-accent-50' },
+    { label: 'Beneficiários', value: beneficiarios.filter((b) => b.ativo ?? true).length, icon: HeartHandshake, color: 'text-primary-600', bg: 'bg-primary-50' },
     { label: 'Doações', value: doacoes.length, icon: Gift, color: 'text-amber-600', bg: 'bg-amber-50' },
     { label: 'Solicitações Pendentes', value: pendentes, icon: ClipboardList, color: 'text-red-600', bg: 'bg-red-50' },
   ];
@@ -132,13 +135,17 @@ function StatusRow({ icon: Icon, label, value, total, color }: { icon: typeof Us
 }
 
 function SolicitacaoStatusBadge({ status }: { status: Solicitacao['status'] }) {
-  const map: Record<Solicitacao['status'], { v: 'success' | 'warning' | 'error' | 'info' | 'neutral' | 'primary'; l: string }> = {
+  const map: Record<string, { v: 'success' | 'warning' | 'error' | 'info' | 'neutral' | 'primary'; l: string }> = {
     PENDENTE: { v: 'warning', l: 'Pendente' },
     EM_ANALISE: { v: 'info', l: 'Em Análise' },
     APROVADA: { v: 'primary', l: 'Aprovada' },
     REJEITADA: { v: 'error', l: 'Rejeitada' },
     ATENDIDA: { v: 'success', l: 'Atendida' },
   };
-  const c = map[status];
+
+  // Tratamento seguro para undefined, null ou minúsculas vindas da API
+  const safeKey = status ? String(status).toUpperCase() : 'PENDENTE';
+  const c = map[safeKey] || { v: 'neutral', l: status || 'Indefinido' };
+
   return <Badge variant={c.v}>{c.l}</Badge>;
 }
