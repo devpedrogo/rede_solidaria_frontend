@@ -20,18 +20,19 @@ export interface Doador {
   createdAt: string;
 }
 
+export type StatusUsuario = 'ATIVO' | 'INATIVO';
+export type TipoBeneficiario = 'FAMILIA' | 'ONG' | 'ESCOLA' | 'ABRIGO';
+export type NivelPrioridade = 'CRITICA' | 'URGENTE' | 'MEDIA' | 'BAIXA';
+
 export interface Beneficiario {
   id: string;
   nome: string;
-  email: string;
-  telefone: string;
-  documento: string;
-  endereco: string;
-  prioridade: 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA';
-  tipo: 'INDIVIDUAL' | 'FAMILIAR' | 'INSTITUICAO';
-  observacoes?: string;
-  ativo: boolean;
-  createdAt: string;
+  telefone?: string;
+  endereco?: string;
+  tipoBeneficiario: TipoBeneficiario;
+  nivelPrioridade: NivelPrioridade;
+  status: StatusUsuario;
+  createdAt?: string;
 }
 
 export interface Doacao {
