@@ -32,17 +32,17 @@ export interface Beneficiario {
   createdAt?: string;
 }
 
+export type CategoriaItem = 'ALIMENTACAO' | 'HIGIENE' | 'VESTUARIO' | 'SAUDE' | 'EDUCACAO' | 'OUTROS';
+export type StatusItem = 'DISPONIVEL' | 'RESERVADO' | 'ESGOTADO';
+
 export interface Doacao {
   id: string;
-  doadorId: string;
-  doadorNome: string;
-  beneficiarioId: string;
-  beneficiarioNome: string;
-  descricao: string;
+  nome: string;
+  categoria: CategoriaItem;
   quantidade: number;
-  categoria: 'ALIMENTOS' | 'ROUPAS' | 'MEDICAMENTOS' | 'DINHEIRO' | 'OUTROS';
-  data: string;
-  status: 'PENDENTE' | 'ENTREGUE' | 'CANCELADA';
+  status: StatusItem;
+  data?: string;
+  createdAt?: string;
 }
 
 export interface Solicitacao {

@@ -53,7 +53,7 @@ export const doadoresService = {
   },
   async create(payload: Partial<Doador>): Promise<Doador> {
     try { const { data } = await api.post('/doadores', payload); return data; }
-    catch (err) { if (isBackendDown(err)) { await delay(); const novo: Doador = { id: 'd' + Date.now(), ativo: true, createdAt: new Date().toISOString(), nome:'', email:'', telefone:'', documento:'', tipo:'PF', ...payload }; return novo; } throw err; }
+    catch (err) { if (isBackendDown(err)) { await delay(); const novo: Doador = { id: 'd' + Date.now(), status: 'ATIVO', createdAt: new Date().toISOString(), nome:'', telefone:'', endereco:'', ...payload }; return novo; } throw err; }
   },
   async update(id: string, payload: Partial<Doador>): Promise<Doador> {
     try { const { data } = await api.put(`/doadores/${id}`, payload); return data; }
@@ -77,7 +77,7 @@ export const beneficiariosService = {
   },
   async create(payload: Partial<Beneficiario>): Promise<Beneficiario> {
     try { const { data } = await api.post('/beneficiarios', payload); return data; }
-    catch (err) { if (isBackendDown(err)) { await delay(); const novo: Beneficiario = { id: 'b' + Date.now(), ativo: true, createdAt: new Date().toISOString(), nome:'', email:'', telefone:'', documento:'', endereco:'', prioridade:'MEDIA', tipo:'INDIVIDUAL', ...payload }; return novo; } throw err; }
+    catch (err) { if (isBackendDown(err)) { await delay(); const novo: Beneficiario = { id: 'b' + Date.now(), status: 'ATIVO', createdAt: new Date().toISOString(), nome:'', telefone:'', endereco:'', nivelPrioridade:'MEDIA', tipoBeneficiario:'FAMILIA', ...payload }; return novo; } throw err; }
   },
   async update(id: string, payload: Partial<Beneficiario>): Promise<Beneficiario> {
     try { const { data } = await api.put(`/beneficiarios/${id}`, payload); return data; }
@@ -90,18 +90,52 @@ export const beneficiariosService = {
 };
 
 // ---------- DOACOES ----------
+export interface DoacaoFilterParams {
+  status?: string;
+  categoria?: string;
+  page?: number;
+  size?: number;
+}
+
 export const doacoesService = {
-  async list(): Promise<Doacao[]> {
-    try { const { data } = await api.get('/doacoes'); return Array.isArray(data) ? data : data.content ?? []; }
-    catch (err) { if (isBackendDown(err)) { await delay(); return [...mockDoacoes]; } throw err; }
+  async list(params?: DoacaoFilterParams): Promise<any> {
+    try {
+      const cleanParams: Record<string, any> = {};
+      if (params?.status && params.status !== 'all') cleanParams.status = params.status;
+      if (params?.categoria && params.categoria !== 'all') cleanParams.categoria = params.categoria;
+      if (params?.page !== undefined) cleanParams.page = params.page;
+      if (params?.size !== undefined) cleanParams.size = params.size;
+
+      const { data } = await api.get('/doacoes', { params: cleanParams });
+      return data;
+    } catch (err) {
+      if (isBackendDown(err)) { 
+        await delay(); 
+        return { content: [...mockDoacoes], page: { totalElements: mockDoacoes.length } }; 
+      }
+      throw err;
+    }
   },
   async get(id: string): Promise<Doacao> {
     try { const { data } = await api.get(`/doacoes/${id}`); return data; }
     catch (err) { if (isBackendDown(err)) { await delay(); return mockDoacoes.find((d) => d.id === id)!; } throw err; }
   },
-  async create(payload: Partial<Doacao>): Promise<Doacao> {
+  async create(payload: { nome: string; categoria: string; quantidadeDoada: number; doadorId: number }): Promise<Doacao> {
     try { const { data } = await api.post('/doacoes', payload); return data; }
-    catch (err) { if (isBackendDown(err)) { await delay(); const novo: Doacao = { id: 'do' + Date.now(), status: 'PENDENTE', data: new Date().toISOString(), doadorId:'', doadorNome:'', beneficiarioId:'', beneficiarioNome:'', descricao:'', quantidade:1, categoria:'OUTROS', ...payload }; return novo; } throw err; }
+    catch (err) { 
+      if (isBackendDown(err)) { 
+        await delay(); 
+        const novo: any = { 
+          id: 'do' + Date.now(), 
+          nome: payload.nome,
+          categoria: payload.categoria,
+          quantidade: payload.quantidadeDoada,
+          status: 'DISPONIVEL'
+        }; 
+        return novo; 
+      } 
+      throw err; 
+    }
   },
 };
 
