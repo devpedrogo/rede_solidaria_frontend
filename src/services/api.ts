@@ -142,20 +142,32 @@ export const doacoesService = {
 // ---------- SOLICITACOES ----------
 export const solicitacoesService = {
   async list(): Promise<Solicitacao[]> {
-    try { const { data } = await api.get('/solicitacoes'); return Array.isArray(data) ? data : data.content ?? []; }
-    catch (err) { if (isBackendDown(err)) { await delay(); return [...mockSolicitacoes]; } throw err; }
+    try {
+      const { data } = await api.get('/solicitacoes');
+      return Array.isArray(data) ? data : data.content ?? [];
+    } catch (err) {
+      if (isBackendDown(err)) { await delay(); return [...mockSolicitacoes]; }
+      throw err;
+    }
   },
-  async get(id: string): Promise<Solicitacao> {
-    try { const { data } = await api.get(`/solicitacoes/${id}`); return data; }
-    catch (err) { if (isBackendDown(err)) { await delay(); return mockSolicitacoes.find((s) => s.id === id)!; } throw err; }
+  async create(payload: { itemId: number; beneficiarioId: number; quantidadeSolicitada: number; justificativa: string }): Promise<Solicitacao> {
+    try {
+      const { data } = await api.post('/solicitacoes', payload);
+      return data;
+    } catch (err) {
+      if (isBackendDown(err)) { await delay(); return { id: Date.now(), ...payload } as any; }
+      throw err;
+    }
   },
-  async create(payload: Partial<Solicitacao>): Promise<Solicitacao> {
-    try { const { data } = await api.post('/solicitacoes', payload); return data; }
-    catch (err) { if (isBackendDown(err)) { await delay(); const novo: Solicitacao = { id: 's' + Date.now(), status: 'PENDENTE', createdAt: new Date().toISOString(), beneficiarioId:'', beneficiarioNome:'', descricao:'', categoria:'OUTROS', quantidade:1, urgencia:'MEDIA', ...payload }; return novo; } throw err; }
-  },
-  async updateStatus(id: string, status: Solicitacao['status']): Promise<Solicitacao> {
-    try { const { data } = await api.patch(`/solicitacoes/${id}/status`, { status }); return data; }
-    catch (err) { if (isBackendDown(err)) { await delay(); return { ...mockSolicitacoes.find((s) => s.id === id)!, status }; } throw err; }
+  async updateStatus(id: string | number, status: string): Promise<Solicitacao> {
+    try {
+      // Envia PATCH /solicitacoes/{id}/status com JSON { "status": "PENDENTE" }
+      const { data } = await api.patch(`/solicitacoes/${id}/status`, { status });
+      return data;
+    } catch (err) {
+      if (isBackendDown(err)) { await delay(); return { id, status } as any; }
+      throw err;
+    }
   },
 };
 

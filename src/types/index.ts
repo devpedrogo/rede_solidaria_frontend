@@ -45,16 +45,18 @@ export interface Doacao {
   createdAt?: string;
 }
 
+export type StatusSolicitacao = 'PENDENTE' | 'APROVADA' | 'REJEITADA' | 'CONCLUIDA';
+
 export interface Solicitacao {
-  id: string;
-  beneficiarioId: string;
-  beneficiarioNome: string;
-  descricao: string;
-  categoria: 'ALIMENTOS' | 'ROUPAS' | 'MEDICAMENTOS' | 'DINHEIRO' | 'OUTROS';
+  id: string | number;
+  itemId: string | number;
+  nomeItem: string;
+  beneficiarioId: string | number;
+  nomeBeneficiario: string;
   quantidade: number;
-  urgencia: 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA';
-  status: 'PENDENTE' | 'EM_ANALISE' | 'APROVADA' | 'REJEITADA' | 'ATENDIDA';
-  createdAt: string;
+  justificativa: string;
+  status: StatusSolicitacao;
+  createdAt?: string;
 }
 
 export interface Operador {
