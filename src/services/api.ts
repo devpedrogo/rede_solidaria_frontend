@@ -198,23 +198,77 @@ export const operadoresService = {
 // ---------- ADMINS (ADMIN) ----------
 export const adminsService = {
   async list(): Promise<Admin[]> {
-    try { const { data } = await api.get('/admins'); return Array.isArray(data) ? data : data.content ?? []; }
-    catch (err) { if (isBackendDown(err)) { await delay(); return [...mockAdmins]; } throw err; }
+    try {
+      const { data } = await api.get('/admins');
+      return Array.isArray(data) ? data : data.content ?? [];
+    } catch (err) {
+      if (isBackendDown(err)) {
+        await delay();
+        return [...mockAdmins];
+      }
+      throw err;
+    }
   },
-  async get(id: string): Promise<Admin> {
-    try { const { data } = await api.get(`/admins/${id}`); return data; }
-    catch (err) { if (isBackendDown(err)) { await delay(); return mockAdmins.find((a) => a.id === id)!; } throw err; }
+
+  async get(id: number | string): Promise<Admin> {
+    try {
+      const { data } = await api.get(`/admins/${id}`);
+      return data;
+    } catch (err) {
+      if (isBackendDown(err)) {
+        await delay();
+        return mockAdmins.find((a) => String(a.id) === String(id))!;
+      }
+      throw err;
+    }
   },
-  async create(payload: Partial<Admin> & { senha?: string }): Promise<Admin> {
-    try { const { data } = await api.post('/admins', payload); return data; }
-    catch (err) { if (isBackendDown(err)) { await delay(); const novo: Admin = { id: 'a' + Date.now(), ativo: true, createdAt: new Date().toISOString(), nome:'', email:'', telefone:'', ...payload }; return novo; } throw err; }
+
+  async create(payload: Record<string, any>): Promise<Admin> {
+    try {
+      const { data } = await api.post('/admins', payload);
+      return data;
+    } catch (err) {
+      if (isBackendDown(err)) {
+        await delay();
+        const novo: Admin = {
+          id: Date.now() as any,
+          status: 'ATIVO',
+          ativo: true,
+          createdAt: new Date().toISOString(),
+          nome: '',
+          email: '',
+          telefone: '',
+          ...(payload as any),
+        };
+        return novo;
+      }
+      throw err;
+    }
   },
-  async update(id: string, payload: Partial<Admin>): Promise<Admin> {
-    try { const { data } = await api.put(`/admins/${id}`, payload); return data; }
-    catch (err) { if (isBackendDown(err)) { await delay(); return { ...mockAdmins.find((a) => a.id === id)!, ...payload }; } throw err; }
+
+  async update(id: number | string, payload: Record<string, any>): Promise<Admin> {
+    try {
+      const { data } = await api.put(`/admins/${id}`, payload);
+      return data;
+    } catch (err) {
+      if (isBackendDown(err)) {
+        await delay();
+        const target = mockAdmins.find((a) => String(a.id) === String(id))!;
+        return { ...target, ...payload };
+      }
+      throw err;
+    }
   },
-  async remove(id: string): Promise<void> {
-    try { await api.delete(`/admins/${id}`); }
-    catch (err) { if (isBackendDown(err)) { await delay(); return; } throw err; }
+
+  async remove(id: number | string): Promise<void> {
+    try {
+      await api.delete(`/admins/${id}`);
+    } catch (err) {
+      if (isBackendDown(err)) {
+        await delay();
+        return;
+      }
+      throw err;
+    }
   },
 };

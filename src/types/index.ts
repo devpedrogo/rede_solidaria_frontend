@@ -73,6 +73,6 @@ export interface Admin {
   nome: string;
   email: string;
   telefone: string;
-  ativo: boolean;
+  status: StatusUsuario;
   createdAt: string;
 }
