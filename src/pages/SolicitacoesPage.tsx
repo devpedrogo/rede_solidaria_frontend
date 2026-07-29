@@ -149,14 +149,27 @@ export default function SolicitacoesPage() {
 
   const updateStatus = async () => {
     if (!statusModal) return;
+
+    // Validação rápida no client-side para o mesmo status
+    if (statusModal.status === newStatus) {
+      toast.warning(`A solicitação já está no status: ${statusLabel[newStatus] || newStatus}`);
+      return;
+    }
+
     setUpdatingStatus(true);
     try {
       await solicitacoesService.updateStatus(statusModal.id, newStatus as any);
       toast.success('Status atualizado com sucesso!');
       setStatusModal(null);
       load();
-    } catch {
-      toast.error('Erro ao atualizar status.');
+    } catch (err: any) {
+      // Extrai a mensagem exata lançada pela RegraDeNegocioException do Spring
+      const backendMessage =
+        err?.response?.data?.message ??
+        (typeof err?.response?.data === 'string' ? err.response.data : null) ??
+        'Erro ao atualizar status.';
+
+      toast.error(backendMessage);
     } finally {
       setUpdatingStatus(false);
     }
@@ -356,7 +369,11 @@ export default function SolicitacoesPage() {
             <Button variant="outline" onClick={() => setStatusModal(null)}>
               Cancelar
             </Button>
-            <Button onClick={updateStatus} loading={updatingStatus}>
+            <Button 
+              onClick={updateStatus} 
+              loading={updatingStatus}
+              disabled={statusModal?.status === 'CONCLUIDA' || statusModal?.status === 'REJEITADA'}
+            >
               Atualizar
             </Button>
           </>
@@ -366,20 +383,30 @@ export default function SolicitacoesPage() {
           <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
             <p className="text-sm font-semibold text-gray-900">{statusModal?.nomeBeneficiario}</p>
             <p className="text-xs text-gray-600 mt-0.5">Item: {statusModal?.nomeItem} ({statusModal?.quantidade} un.)</p>
+            <p className="text-xs font-medium text-gray-500 mt-1">
+              Status Atual: <span className="text-gray-900">{statusLabel[statusModal?.status || 'PENDENTE']}</span>
+            </p>
           </div>
 
-          <Field label="Novo Status" required>
-            <Select
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
-            >
-              {Object.entries(statusLabel).map(([v, l]) => (
-                <option key={v} value={v}>
-                  {l}
-                </option>
-              ))}
-            </Select>
-          </Field>
+          {/* Alerta preventivo no Modal se o status for final */}
+          {(statusModal?.status === 'CONCLUIDA' || statusModal?.status === 'REJEITADA') ? (
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+              Esta solicitação encontra-se <strong>{statusModal.status}</strong> e não pode mais ter seu status alterado.
+            </div>
+          ) : (
+            <Field label="Novo Status" required>
+              <Select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+              >
+                {Object.entries(statusLabel).map(([v, l]) => (
+                  <option key={v} value={v}>
+                    {l}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          )}
         </div>
       </Modal>
     </div>
