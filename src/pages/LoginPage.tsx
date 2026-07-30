@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Heart, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import Button from '@/components/ui/Button';
+import { api } from '@/services/api'; // 👈 Certifique-se de importar sua instância do Axios
 
 export default function LoginPage() {
   const { login, loading } = useAuth();
@@ -13,6 +14,30 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [showSenha, setShowSenha] = useState(false);
+  const [isWakingUp, setIsWakingUp] = useState(false);
+
+  // 🟢 PING DE AQUECIMENTO (Warm-up)
+  useEffect(() => {
+    let isMounted = true;
+    
+    const warmupServer = async () => {
+      try {
+        setIsWakingUp(true);
+        // Faz uma requisição leve em qualquer endpoint público (ex: swagger / api-docs / health)
+        await api.get('/v3/api-docs');
+      } catch {
+        // Ignora erros (se falhar, o login normal lidará com a requisição)
+      } finally {
+        if (isMounted) setIsWakingUp(false);
+      }
+    };
+
+    warmupServer();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +50,7 @@ export default function LoginPage() {
       toast.success(`Bem-vindo, ${user.nome.split(' ')[0]}!`);
       navigate('/dashboard');
     } catch {
-      toast.error('Credenciais inválidas. Tente novamente.');
+      toast.error('Credenciais inválidas ou servidor indisponível.');
     }
   };
 
@@ -82,7 +107,15 @@ export default function LoginPage() {
           </div>
 
           <h2 className="text-2xl font-bold text-gray-900">Acessar plataforma</h2>
-          <p className="text-sm text-gray-500 mt-1.5 mb-8">Entre com suas credenciais para continuar.</p>
+          <p className="text-sm text-gray-500 mt-1.5 mb-6">Entre com suas credenciais para continuar.</p>
+
+          {/* 🟡 AVISO DE INICIALIZAÇÃO DO SERVIDOR */}
+          {isWakingUp && (
+            <div className="mb-6 p-3 rounded-lg bg-amber-50 border border-amber-200 flex items-center gap-2.5 text-amber-800 text-xs">
+              <Loader2 className="w-4 h-4 animate-spin text-amber-600 shrink-0" />
+              <span>Iniciando o servidor em nuvem... O primeiro acesso pode levar ~30 segundos.</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
