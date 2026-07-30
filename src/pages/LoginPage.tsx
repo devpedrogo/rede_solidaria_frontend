@@ -4,7 +4,7 @@ import { Heart, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-reac
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import Button from '@/components/ui/Button';
-import { api } from '@/services/api'; // 👈 Certifique-se de importar sua instância do Axios
+import { api } from '@/services/apiClient'; // 👈 Certifique-se de importar sua instância do Axios
 
 export default function LoginPage() {
   const { login, loading } = useAuth();
