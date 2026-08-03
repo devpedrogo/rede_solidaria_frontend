@@ -33,7 +33,7 @@ Interface web moderna, responsiva e performática desenvolvida em **React + Type
 
 Para conectar o frontend à API correta (local ou produção), crie um arquivo .env na raiz do projeto:
 
-VITE_API_URL=https://sua-api-no-render.onrender.com
+VITE_API_URL=https://rede-solidaria-api.onrender.com
 
 *Se a variável não for informada, o cliente HTTP utilizará o endereço de desenvolvimento local por padrão (http://localhost:8080).*
 
@@ -48,7 +48,7 @@ VITE_API_URL=https://sua-api-no-render.onrender.com
 ### Passos:
 
 1. **Clonar o repositório:**
-   git clone https://github.com/seu-usuario/rede-solidaria-frontend.git
+   git clone https://github.com/devpedrogo/rede_solidaria_frontend.git
    cd rede-solidaria-frontend
 
 2. **Instalar as dependências:**
